@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>長者健康運動網</title>
+    
+    <!-- 引入 Tailwind CSS 框架，用於快速排版和設計 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 引入 FontAwesome 圖示庫 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- 設定自訂顏色與主題 (溫和淺綠色與大地色) -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'elder-green-light': '#dcfce7', // 淺綠色背景
+                        'elder-green-main': '#166534',  // 深綠色文字/按鈕 (高對比)
+                        'elder-earth-light': '#fef3c7', // 淺大地色/米黃色背景
+                        'elder-earth-main': '#92400e',  // 深大地色文字 (高對比)
+                    },
+                    fontFamily: {
+                        'sans': ['"PingFang HK"', '"Microsoft JhengHei"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* 平滑滾動效果 */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* 確保字體夠大，方便長者閱讀 */
+        body {
+            font-size: 1.25rem; /* 預設為較大字體 (20px) */
+            line-height: 1.6;
+            color: #111827; /* 極深灰色，確保高對比 */
+        }
+
+        /* 隱藏捲軸但保留滾動功能的樣式 (用於模態框) */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* 影片容器，確保比例正確 */
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 */
+            height: 0;
+            overflow: hidden;
+            max-width: 100%;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="bg-elder-earth-light">
+
+    <!-- ========================================== -->
+    <!-- 頂部 (Header/Hero) -->
+    <!-- ========================================== -->
+    <header class="relative h-screen flex flex-col items-center justify-center text-center overflow-hidden">
+        <!-- 背景圖片 (大風景相) -->
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1518495973542-4542c06a5843?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" 
+                 alt="美麗的大自然風景" 
+                 class="w-full h-full object-cover opacity-60">
+            <!-- 加上一層半透明覆蓋，讓文字更清楚 -->
+            <div class="absolute inset-0 bg-white/40"></div>
+        </div>
+
+        <!-- 中間文字 -->
+        <div class="relative z-10 p-6 bg-white/80 rounded-2xl shadow-xl border-4 border-elder-green-main mx-4">
+            <h1 class="text-4xl md:text-6xl font-bold text-elder-green-main mb-4 tracking-wide">
+                天天做運動<br class="md:hidden"> 健康伴你行
+            </h1>
+            <p class="text-2xl text-elder-earth-main font-semibold">
+                歡迎來到長者健康運動網
+            </p>
+        </div>
+
+        <!-- 下面的箭咀 (點擊可滾動到內容) -->
+        <a href="#main-content" class="absolute bottom-10 z-10 animate-bounce cursor-pointer p-4 bg-elder-green-main text-white rounded-full shadow-lg hover:bg-green-800 transition-colors">
+            <i class="fa-solid fa-arrow-down text-4xl"></i>
+            <span class="sr-only">向下捲動</span>
+        </a>
+    </header>
+
+    <!-- ========================================== -->
+    <!-- 中部 (Main Content) -->
+    <!-- ========================================== -->
+    <main id="main-content" class="max-w-6xl mx-auto px-4 py-16">
+        
+        <!-- 分類按鈕 -->
+        <div class="flex flex-wrap justify-center gap-4 mb-12" id="category-buttons">
+            <!-- 按鈕由 JavaScript 動態生成 -->
+        </div>
+
+        <!-- 卡片展示區 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="card-grid">
+            <!-- 卡片由 JavaScript 動態生成 -->
+        </div>
+
+    </main>
+
+    <!-- ========================================== -->
+    <!-- 底部 (Footer) -->
+    <!-- ========================================== -->
+    <footer class="bg-elder-green-main text-white py-8 mt-12 text-center">
+        <p class="text-xl">&copy; 2026 社區中心版權所有</p>
+        <p class="text-lg mt-2 opacity-80">保持活力，健康長壽</p>
+    </footer>
+
+    <!-- ========================================== -->
+    <!-- 互動模態框 (Modals) -->
+    <!-- ========================================== -->
+    
+    <!-- 影片播放 Modal -->
+    <div id="video-modal" class="fixed inset-0 z-50 hidden bg-black/90 flex items-center justify-center p-4">
+        <div class="relative w-full max-w-4xl bg-white rounded-xl overflow-hidden shadow-2xl">
+            <!-- 關閉按鈕 (特大) -->
+            <button onclick="closeVideoModal()" class="absolute -top-2 -right-2 z-50 m-4 bg-red-600 text-white w-14 h-14 rounded-full text-2xl font-bold border-4 border-white shadow-lg hover:bg-red-700">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="p-4 bg-elder-green-main text-white text-2xl font-bold" id="video-modal-title">影片標題</div>
+            <div class="p-2 bg-black video-container" id="video-container-inner">
+                <!-- iframe 將會在這裡插入 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 圖片放大檢視 (Lightbox) Modal -->
+    <div id="image-modal" class="fixed inset-0 z-50 hidden bg-black/95 flex items-center justify-center p-4" onclick="closeImageModal()">
+        <!-- 關閉按鈕 (特大) -->
+        <button onclick="closeImageModal()" class="absolute top-4 right-4 z-50 bg-red-600 text-white w-14 h-14 rounded-full text-2xl font-bold border-4 border-white shadow-lg hover:bg-red-700">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <img id="lightbox-image" src="" alt="放大圖片" class="max-w-full max-h-[85vh] object-contain border-4 border-white rounded-lg shadow-2xl">
+        <p id="lightbox-title" class="absolute bottom-10 text-white text-3xl font-bold text-center w-full drop-shadow-lg">圖片標題</p>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- JavaScript 邏輯與資料 -->
+    <!-- ========================================== -->
+    <script>
+        // =========================================================================
+        // ↓↓↓ 我可以修改資料的地方 (Data Configuration) ↓↓↓
+        // 請在這裡新增、修改或刪除卡片資料。
+        // type 只能填: 'video' (影片), 'pdf' (檔案), 'image' (相片)
+        // category 只能填: '太極', '拉筋', '跳舞' (會自動對應到按鈕)
+        // =========================================================================
+        const siteData = [
+            {
+                id: 1,
+                type: 'video',
+                category: '太極',
+                title: '晨運太極二十四式 (第一節)',
+                thumbnail: 'https://images.unsplash.com/photo-1555022880-008eb4132007?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80', // 封面縮圖
+                url: 'https://www.youtube.com/embed/z4A8mYofGAs', // YouTube 嵌入網址 (必須是 embed/ 格式)
+                description: '適合初學者的簡單太極動作，幫助活動筋骨。'
+            },
+            {
+                id: 2,
+                type: 'pdf',
+                category: '拉筋',
+                title: '長者安全椅子拉筋法圖解',
+                thumbnail: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+                url: '#', // 這裡填寫 PDF 檔案的下載網址 (例如: document.pdf)
+                description: '坐在椅子上也能做的安全拉筋運動，附詳細圖文解說。'
+            },
+            {
+                id: 3,
+                type: 'video',
+                category: '跳舞',
+                title: '歡樂廣場舞：月亮代表我的心',
+                thumbnail: 'https://images.unsplash.com/photo-1516934524458-16e6dcb5e0df?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+                url: 'https://www.youtube.com/embed/jfKfPfyJRdk', 
+                description: '跟著熟悉的音樂一起舞動，保持心情愉快。'
+            },
+            {
+                id: 4,
+                type: 'image',
+                category: '太極',
+                title: '2026年春季太極班戶外大合照',
+                thumbnail: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+                url: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80', // 放大的高清圖片網址
+                description: '大家在公園一起練習太極的美好時光。'
+            },
+            {
+                id: 5,
+                type: 'video',
+                category: '拉筋',
+                title: '毛巾伸展操 (保護肩頸)',
+                thumbnail: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+                url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', 
+                description: '利用一條毛巾就能舒緩肩頸痠痛。'
+            },
+            {
+                id: 6,
+                type: 'image',
+                category: '跳舞',
+                title: '中秋聯歡晚會舞蹈表演',
+                thumbnail: 'https://images.unsplash.com/photo-1533147670608-2a2f9775d3a4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+                url: 'https://images.unsplash.com/photo-1533147670608-2a2f9775d3a4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+                description: '長者舞蹈團在舞台上的精彩演出。'
+            }
+        ];
+        // =========================================================================
+        // ↑↑↑ 我可以修改資料的地方 (Data Configuration) ↑↑↑
+        // =========================================================================
+
+
+        // 全部分類清單 (包含 '全部')
+        const categories = ['全部', '太極', '拉筋', '跳舞'];
+        let currentCategory = '全部';
+
+        // 頁面載入後執行
+        document.addEventListener('DOMContentLoaded', () => {
+            renderButtons();
+            renderCards();
+        });
+
+        // 渲染分類按鈕
+        function renderButtons() {
+            const btnContainer = document.getElementById('category-buttons');
+            btnContainer.innerHTML = '';
+
+            categories.forEach(cat => {
+                const isSelected = currentCategory === cat;
+                const btn = document.createElement('button');
+                
+                // 長者友善設計：按鈕超大，顏色對比強烈
+                btn.className = `px-8 py-4 rounded-xl text-2xl font-bold border-4 transition-all shadow-md ${
+                    isSelected 
+                    ? 'bg-elder-green-main text-white border-elder-green-main scale-105' 
+                    : 'bg-white text-elder-green-main border-elder-green-main hover:bg-elder-green-light'
+                }`;
+                btn.innerText = cat;
+                btn.onclick = () => {
+                    currentCategory = cat;
+                    renderButtons(); // 更新按鈕樣式
+                    renderCards();   // 更新卡片內容
+                };
+                btnContainer.appendChild(btn);
+            });
+        }
+
+        // 渲染卡片
+        function renderCards() {
+            const grid = document.getElementById('card-grid');
+            grid.innerHTML = '';
+
+            // 根據當前選擇過濾資料
+            const filteredData = currentCategory === '全部' 
+                ? siteData 
+                : siteData.filter(item => item.category === currentCategory);
+
+            if(filteredData.length === 0) {
+                grid.innerHTML = '<p class="text-2xl text-center col-span-full text-gray-500 py-10">目前這個分類還沒有資料喔！</p>';
+                return;
+            }
+
+            filteredData.forEach(item => {
+                const card = document.createElement('div');
+                // 卡片外觀：圓角、陰影、懸浮時會放大一點
+                card.className = 'bg-white rounded-2xl overflow-hidden shadow-xl border-2 border-gray-200 flex flex-col transition-transform hover:-translate-y-2 hover:shadow-2xl';
+
+                // 根據類型產生不同的互動內容與圖標
+                let interactionHTML = '';
+                let iconBadgeHTML = '';
+
+                if (item.type === 'video') {
+                    // 功能 1：直接播放 YouTube
+                    iconBadgeHTML = '<div class="absolute top-4 left-4 bg-red-600 text-white px-4 py-2 rounded-full text-lg font-bold"><i class="fa-brands fa-youtube mr-2"></i>影片</div>';
+                    interactionHTML = `
+                        <button onclick="openVideoModal('${item.url}', '${item.title}')" class="mt-4 w-full bg-elder-green-main text-white py-4 px-6 rounded-xl text-2xl font-bold hover:bg-green-800 transition-colors flex items-center justify-center gap-3">
+                            <i class="fa-solid fa-play text-3xl"></i> 播放影片
+                        </button>`;
+                } else if (item.type === 'pdf') {
+                    // 功能 2：PDF 下載按鈕
+                    iconBadgeHTML = '<div class="absolute top-4 left-4 bg-blue-600 text-white px-4 py-2 rounded-full text-lg font-bold"><i class="fa-solid fa-file-pdf mr-2"></i>講義</div>';
+                    interactionHTML = `
+                        <a href="${item.url}" target="_blank" class="mt-4 w-full bg-blue-600 text-white py-4 px-6 rounded-xl text-2xl font-bold hover:bg-blue-800 transition-colors flex items-center justify-center gap-3 text-center block">
+                            <i class="fa-solid fa-download text-3xl"></i> 自動下載
+                        </a>`;
+                } else if (item.type === 'image') {
+                    // 功能 3：圖片放大 (Lightbox)
+                    iconBadgeHTML = '<div class="absolute top-4 left-4 bg-amber-600 text-white px-4 py-2 rounded-full text-lg font-bold"><i class="fa-solid fa-image mr-2"></i>相片</div>';
+                    interactionHTML = `
+                        <button onclick="openImageModal('${item.url}', '${item.title}')" class="mt-4 w-full bg-amber-600 text-white py-4 px-6 rounded-xl text-2xl font-bold hover:bg-amber-800 transition-colors flex items-center justify-center gap-3">
+                            <i class="fa-solid fa-magnifying-glass-plus text-3xl"></i> 放大檢視
+                        </button>`;
+                }
+
+                // 組合卡片 HTML
+                card.innerHTML = `
+                    <div class="relative h-64 cursor-pointer overflow-hidden" 
+                         ${item.type === 'video' ? `onclick="openVideoModal('${item.url}', '${item.title}')"` : ''}
+                         ${item.type === 'image' ? `onclick="openImageModal('${item.url}', '${item.title}')"` : ''}>
+                        <img src="${item.thumbnail}" alt="${item.title}" class="w-full h-full object-cover hover:scale-110 transition-transform duration-500">
+                        ${iconBadgeHTML}
+                        ${item.type === 'video' ? '<div class="absolute inset-0 flex items-center justify-center"><div class="bg-black/50 rounded-full w-20 h-20 flex items-center justify-center"><i class="fa-solid fa-play text-white text-4xl ml-2"></i></div></div>' : ''}
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between bg-elder-green-light/30">
+                        <div>
+                            <span class="text-elder-earth-main font-bold text-lg mb-2 block border-b-2 border-elder-earth-light pb-2">${item.category}</span>
+                            <h3 class="text-3xl font-bold text-gray-900 mb-4 leading-tight">${item.title}</h3>
+                            <p class="text-gray-700 text-xl">${item.description}</p>
+                        </div>
+                        <div>
+                            ${interactionHTML}
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // ==========================================
+        // 互動功能邏輯
+        // ==========================================
+
+        // 開啟影片
+        function openVideoModal(url, title) {
+            const modal = document.getElementById('video-modal');
+            const container = document.getElementById('video-container-inner');
+            document.getElementById('video-modal-title').innerText = title;
+            
+            // 插入 iframe，加入 autoplay=1 參數讓影片自動播放 (視瀏覽器政策而定)
+            // 為了長者方便，顯示完整控制列 controls=1
+            const videoUrl = url.includes('?') ? `${url}&autoplay=1` : `${url}?autoplay=1`;
+            container.innerHTML = `<iframe src="${videoUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+            
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // 防止背景滾動
+        }
+
+        // 關閉影片
+        function closeVideoModal() {
+            const modal = document.getElementById('video-modal');
+            const container = document.getElementById('video-container-inner');
+            container.innerHTML = ''; // 清空 iframe 以停止播放影片
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto'; // 恢復背景滾動
+        }
+
+        // 開啟圖片放大
+        function openImageModal(url, title) {
+            const modal = document.getElementById('image-modal');
+            const img = document.getElementById('lightbox-image');
+            
+            img.src = url;
+            document.getElementById('lightbox-title').innerText = title;
+            
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // 防止背景滾動
+            
+            // 避免點擊圖片本身時關閉視窗
+            img.onclick = (e) => e.stopPropagation(); 
+        }
+
+        // 關閉圖片放大
+        function closeImageModal() {
+            const modal = document.getElementById('image-modal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto'; // 恢復背景滾動
+        }
+
+    </script>
+</body>
+</html>
+
+```
